@@ -24,6 +24,10 @@
         display: block;
         margin-left: auto;
         margin-right: auto;
+        width: 90%;
+        background-color: white;
+        border-radius: 10px;
+        padding: 0.2em;
       }
       #data-container {
         display: flex;
@@ -47,16 +51,26 @@
         color: red;
       }
       #stations {
-        background-color: grey;
+        background-color: white;
+        color: grey;
+        width: 90%;
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
         border-radius: 10px;
-        width: 50%;
         margin-left: auto;
         margin-right: auto;
+        margin-top: 3em;
+        padding: 1em;
+        word-break: break-word;
       }
       @media only screen and (max-width: 700px) {
         input,
         button {
           width: 50%;
+        }
+        #stations {
+          font-size: 8px;
         }
       }
     </style>
@@ -80,20 +94,16 @@
       />
       <button class="btn btn-success" onclick="clearAndPrint()">senden</button>
       <p id="error-message"></p>
-      <div id="stations"></div>
       <a id="maps" target="_blank"></a>
-      <table id="data">
-        <tr>
-          <th>Zeitpunkt</th>
-          <th>Temperatur</th>
-        </tr>
-      </table>
     </div>
+    <canvas id="data"></canvas>
+    <div id="stations"></div>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
       integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
       crossorigin="anonymous"
     ></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
       let data = document.getElementById("data");
       let date = document.getElementById("date");
@@ -103,6 +113,32 @@
       let stations = document.getElementById("stations");
 
       let errorMessage = document.getElementById("error-message");
+
+      let chart = new Chart(data, {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "Temperature in °C",
+              data: [],
+              borderWidth: 1,
+              fill: {
+                target: "origin",
+                above: "rgba(255, 0, 0, 0.5)", // Area will be red above the origin
+                below: "rgb(0, 0, 255, 0.5)", // And blue below the origin
+              },
+            },
+          ],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      });
 
       async function getWeather() {
         let url = "https://api.brightsky.dev/weather";
@@ -131,36 +167,21 @@
         let sources = response.sources;
 
         stations.innerText = "";
-
-        stations.innerHTML = "<p>Wetterstationen:</p>";
-
+        stations.innerHTML = "<div>Wetterstationen:</div><div>";
         sources.forEach((source) => {
-          stations.innerHTML += "<p> " + source.station_name + "</p>";
+          stations.innerHTML += "<div> " + source.station_name + "</div>";
         });
+        stations.innerHTML += "</div>";
 
-        for (let i = 0; i < weather.length; i++) {
-          let datum = new Date(weather[i].timestamp);
-          data.innerHTML +=
-            "<tr><td>" +
-            datum.getDate() +
-            "." +
-            Number(datum.getMonth() + 1) +
-            "." +
-            datum.getFullYear() +
-            ": " +
-            datum.getHours() +
-            " Uhr" +
-            "</td>" +
-            "<td>" +
-            weather[i].temperature +
-            " °C</td></tr>";
-        }
+        chart.data.labels = weather.map(
+          (el) => new Date(el.timestamp).getHours() + " Uhr"
+        );
+        chart.data.datasets[0].data = weather.map((el) => el.temperature);
+
+        chart.update();
       }
-      function clearTable() {
-        data.innerHTML = "<tr><th>Zeitpunkt</th><th>Temperatur</th></tr>";
-      }
+
       function clearAndPrint() {
-        clearTable();
         printTemperature();
         maps.href = "http://maps.google.com?q=" + lat.value + "," + lon.value;
         maps.innerText = "Google Maps";
