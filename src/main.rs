@@ -1,4 +1,4 @@
-use actix_web::{web, App, HttpResponse, HttpServer, get, http::header::ContentType};
+use actix_web::{App, HttpResponse, HttpServer, get, http::header::ContentType};
 
 #[get("/hello")]
 async fn hello() -> HttpResponse{
@@ -26,7 +26,7 @@ async fn main() -> std::io::Result<()> {
         .service(hello)
         .service(home_page)
     })
-        .bind(("192.168.178.34", 8080))?
+        .bind(("localhost", 8080))?
         .run()
         .await
 }

@@ -1,118 +1,170 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-        <title>Wettervorhersage</title>
-        <style>
-            td,th {
-                text-align: center;
-                padding: 0.5em;
-            }
-            body {
-                text-align: center;
-                background-color: rgba(18,14,57,0.79);
-                color: yellow;
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+      integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
+      crossorigin="anonymous"
+    />
+    <title>Wettervorhersage</title>
+    <style>
+      td,
+      th {
+        text-align: center;
+        padding: 0.5em;
+      }
+      body {
+        text-align: center;
+        background-color: rgba(18, 14, 57, 0.79);
+        color: yellow;
+      }
+      #data {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      #data-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+      }
+      h1 {
+        color: yellow;
+      }
+      input,
+      button {
+        width: 25%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      table {
+        background-color: grey;
+        border-radius: 10px;
+      }
+      #error-message {
+        color: red;
+      }
+      #stations {
+        background-color: grey;
+        border-radius: 10px;
+        width: 50%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      @media only screen and (max-width: 700px) {
+        input,
+        button {
+          width: 50%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Wettervorhersage</h1>
+    <p>Nagold: 48.54739131928415, 8.722197797851862</p>
+    <div id="data-container">
+      <input id="date" type="date" placeholder="Bitte Datum angeben!" />
+      <input
+        value="48.54739131928415"
+        id="lat"
+        type="number"
+        placeholder="Bitte Breitengrad angeben!"
+      />
+      <input
+        value="8.722197797851862"
+        id="lon"
+        type="number"
+        placeholder="Bitte Längengrad angeben!"
+      />
+      <button class="btn btn-success" onclick="clearAndPrint()">senden</button>
+      <p id="error-message"></p>
+      <div id="stations"></div>
+      <a id="maps" target="_blank"></a>
+      <table id="data">
+        <tr>
+          <th>Zeitpunkt</th>
+          <th>Temperatur</th>
+        </tr>
+      </table>
+    </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
+      integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      let data = document.getElementById("data");
+      let date = document.getElementById("date");
+      let lat = document.getElementById("lat");
+      let lon = document.getElementById("lon");
+      let maps = document.getElementById("maps");
+      let stations = document.getElementById("stations");
 
-            }
-            #data {
-                display: block;
-                margin-left: auto;
-                margin-right: auto;
-            }
-            #data-container {
-                display: flex;
-                flex-direction: column;
-                gap: 1em;
-            }
-            h1 {
-                color: yellow;
-            }
-            input,button {
-                width: 25%;
-                margin-left: auto;
-                margin-right: auto;
-            }
-            table {
-                background-color: grey;
-                border-radius: 10px;
-            }
-            #error-message {
-                color: red;
-            }
-            @media only screen and (max-width: 700px) {
-                input, button {
-                    width: 50%;
-                }
-            }
-        </style>
+      let errorMessage = document.getElementById("error-message");
 
-    </head>
-    <body>
-        <h1>Wettervorhersage</h1>
-        <p>Nagold: 48.54739131928415, 8.722197797851862</p>
-        <div id="data-container">
-            <input id="date" type="date" placeholder="Bitte Datum angeben!"/>
-            <input value="48.54739131928415" id="lat" type="number" placeholder="Bitte Breitengrad angeben!"/>
-            <input value="8.722197797851862" id="lon" type="number" placeholder="Bitte Längengrad angeben!"/>
-            <button class="btn btn-success" onclick="clearAndPrint()">senden</button>
-            <p id="error-message"></p>
-            <table id="data">
-                <tr>
-                    <th>Zeitpunkt</th><th>Temperatur</th>
-                </tr>
-            </table>
+      async function getWeather() {
+        let url = "https://api.brightsky.dev/weather";
+        let dateValue = date.value;
+        let latValue = lat.value;
+        let lonValue = lon.value;
 
-        </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
-        <script>
-            let data = document.getElementById("data");
-            let date = document.getElementById("date");
-            let lat = document.getElementById("lat");
-            let lon = document.getElementById("lon");
+        const response = await fetch(
+          url + "?lat=" + latValue + "&lon=" + lonValue + "&date=" + dateValue
+        );
+        let weather = "";
 
-            let errorMessage = document.getElementById("error-message");
+        if (response.status != 200) {
+          let messsage = await response.json();
+          errorMessage.innerText = messsage.description;
+        } else {
+          errorMessage.innerText = "";
+          weather = await response.json();
+        }
 
-            async function getWeather() {
-                let url = "https://api.brightsky.dev/weather";
-                let dateValue = date.value;
-                let latValue = lat.value;
-                let lonValue = lon.value;
+        return weather;
+      }
+      async function printTemperature() {
+        let response = await getWeather();
+        let weather = response.weather;
+        let sources = response.sources;
 
-                const response = await fetch(url + "?lat=" + latValue + 
-                "&lon=" + lonValue + "&date=" + dateValue);
-                let weather = "";
+        stations.innerText = "";
 
-                if (response.status != 200) {
-                    let messsage = await response.json()
-                    errorMessage.innerText = messsage.description;
-                } else {
-                    errorMessage.innerText = "";
-                    weather = await response.json();
-                }
+        stations.innerHTML = "<p>Wetterstationen:</p>";
 
-                
-                return weather;
-            }
-            async function printTemperature() {
-                let response = await getWeather();
-                let weather = response.weather;
+        sources.forEach((source) => {
+          stations.innerHTML += "<p> " + source.station_name + "</p>";
+        });
 
-                for(let i = 0; i<weather.length; i++) {
-                    let datum = new Date(weather[i].timestamp);
-                    data.innerHTML += "<tr><td>" + datum.getDate() + "." + Number(datum.getMonth() + 1) + "." + datum.getFullYear() +
-                        ": " + datum.getHours() + " Uhr" + "</td>" + 
-                        "<td>" + weather[i].temperature + " °C</td></tr>"
-                }
-            }
-            function clearTable() {
-                data.innerHTML = "<tr><th>Zeitpunkt</th><th>Temperatur</th></tr>"
-            }
-            function clearAndPrint() {
-                clearTable();
-                printTemperature();
-            }
-            
-        </script>    
-    </body>
+        for (let i = 0; i < weather.length; i++) {
+          let datum = new Date(weather[i].timestamp);
+          data.innerHTML +=
+            "<tr><td>" +
+            datum.getDate() +
+            "." +
+            Number(datum.getMonth() + 1) +
+            "." +
+            datum.getFullYear() +
+            ": " +
+            datum.getHours() +
+            " Uhr" +
+            "</td>" +
+            "<td>" +
+            weather[i].temperature +
+            " °C</td></tr>";
+        }
+      }
+      function clearTable() {
+        data.innerHTML = "<tr><th>Zeitpunkt</th><th>Temperatur</th></tr>";
+      }
+      function clearAndPrint() {
+        clearTable();
+        printTemperature();
+        maps.href = "http://maps.google.com?q=" + lat.value + "," + lon.value;
+        maps.innerText = "Google Maps";
+      }
+    </script>
+  </body>
 </html>
