@@ -1,7 +1,7 @@
-use actix_web::{App, HttpResponse, HttpServer, get, http::header::ContentType, post};
+use actix_web::{get, http::header::ContentType, App, HttpResponse, HttpServer};
 
 #[get("/hello")]
-async fn hello() -> HttpResponse{
+async fn hello() -> HttpResponse {
     HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(include_str!("../assets/hello.html"))
@@ -18,24 +18,18 @@ async fn index_page() -> HttpResponse {
 async fn weather_page() -> HttpResponse {
     HttpResponse::Ok()
         .content_type(ContentType::html())
-        .body(include_str!("../assets/weather.html")) 
-}
-
-//posting temperatures
-#[post("/postWeather")]
-async fn post_weather() -> HttpResponse {
-    todo!()
+        .body(include_str!("../assets/weather.html"))
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
-        .service(hello)
-        .service(index_page)
-        .service(weather_page)
+            .service(hello)
+            .service(index_page)
+            .service(weather_page)
     })
-        .bind(("192.168.178.22", 8080))?
-        .run()
-        .await
+    .bind(("localhost", 8080))?
+    .run()
+    .await
 }

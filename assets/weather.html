@@ -186,6 +186,23 @@
         maps.href = "http://maps.google.com?q=" + lat.value + "," + lon.value;
         maps.innerText = "Google Maps";
       }
+
+      function getGeoLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(setPosition);
+        } else {
+          console.error("Navigator not supported!");
+        }
+      }
+
+      function setPosition(position) {
+        console.log(position.coords.latitude);
+        
+        lat.value = position.coords.latitude;
+        lon.value = position.coords.longitude;
+      }
+
+      getGeoLocation();
     </script>
   </body>
 </html>
