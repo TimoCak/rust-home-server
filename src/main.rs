@@ -1,3 +1,4 @@
+use actix_files::Files;
 use actix_web::{get, http::header::ContentType, App, HttpResponse, HttpServer};
 
 #[get("/hello")]
@@ -28,6 +29,7 @@ async fn main() -> std::io::Result<()> {
             .service(hello)
             .service(index_page)
             .service(weather_page)
+            .service(Files::new("/assets", "./assets").prefer_utf8(true))
     })
     .bind(("localhost", 8080))?
     .run()

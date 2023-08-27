@@ -94,6 +94,11 @@
       />
       <button class="btn btn-success" onclick="clearAndPrint()">senden</button>
       <p id="error-message"></p>
+      <div class="condition-container">
+        <h5 id="condition-headline">Aktuelle Wetterbedingung</h5>
+        <img id="condition-img" width="50" height="50" src="" />
+        <p id="condition-text"></p>
+      </div>
       <a id="maps" target="_blank"></a>
     </div>
     <canvas id="data"></canvas>
@@ -111,6 +116,9 @@
       let lon = document.getElementById("lon");
       let maps = document.getElementById("maps");
       let stations = document.getElementById("stations");
+      let conditionImg = document.getElementById("condition-img");
+      let conditionText = document.getElementById("condition-text");
+      let conditionHeadline = document.getElementById("condition-headline");
 
       let errorMessage = document.getElementById("error-message");
 
@@ -161,6 +169,23 @@
 
         return weather;
       }
+      async function getCurrentWeather() {
+        let url = "https://api.brightsky.dev/current_weather";
+        let latValue = lat.value;
+        let lonValue = lon.value;
+        let weather = {};
+        const response = await fetch(
+          url + "?lat=" + latValue + "&lon=" + lonValue
+        );
+        if (response.status != 200) {
+          let messsage = await response.json();
+          errorMessage.innerText = messsage.description;
+        } else {
+          errorMessage.innerText = "";
+          weather = await response.json();
+        }
+        return weather;
+      }
       async function printTemperature() {
         let response = await getWeather();
         let weather = response.weather;
@@ -197,12 +222,60 @@
 
       function setPosition(position) {
         console.log(position.coords.latitude);
-        
+
         lat.value = position.coords.latitude;
         lon.value = position.coords.longitude;
       }
 
+      async function showCondition() {
+        let weather = await getCurrentWeather();
+        let date = new Date(weather.weather.timestamp);
+        conditionText.innerText = "";
+        conditionHeadline.innerText =
+          "Aktuelle Wetterbedingung: " +
+          date.getHours() +
+          " Uhr, " +
+          date.getFullYear() +
+          "-" +
+          Number(date.getMonth() +
+          1) +
+          "-" +
+          date.getDate();
+        if (weather?.weather.condition) {
+          switch (weather.weather.condition) {
+            case "dry":
+              conditionImg.src = "/assets/img/dry.svg";
+              conditionText.innerText = "Trocken";
+              break;
+            case "fog":
+              conditionImg.src = "/assets/img/fog.svg";
+              conditionText.innerText = "Nebel";
+              break;
+            case "rain":
+              conditionImg.src = "/assets/img/rain.svg";
+              conditionText.innerText = "Regen";
+              break;
+            case "sleet":
+              conditionImg.src = "/assets/img/sleet.svg";
+              conditionText.innerText = "Schneeregen";
+              break;
+            case "snow":
+              conditionImg.src = "/assets/img/snow.svg";
+              conditionText.innerText = "Schnee";
+              break;
+            case "hail":
+              conditionImg.src = "/assets/img/hail.svg";
+              conditionText.innerText = "Hagel";
+              break;
+            case "thunderstorm":
+              conditionImg.src = "/assets/img/thunderstorm.svg";
+              conditionText.innerText = "Gewitter";
+              break;
+          }
+        }
+      }
       getGeoLocation();
+      showCondition();
     </script>
   </body>
 </html>
