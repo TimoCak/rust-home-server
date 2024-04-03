@@ -3,16 +3,10 @@ use actix_web::{
     get,
     http::header::ContentType,
     middleware::Logger,
-    web::{self, get, resource},
-    App, HttpRequest, HttpResponse, HttpServer,
+    web::{self, resource},
+    App, HttpRequest, HttpResponse, HttpServer, Responder,
 };
 use env_logger::Env;
-
-async fn hello() -> HttpResponse {
-    HttpResponse::Ok()
-        .content_type(ContentType::html())
-        .body(include_str!("../assets/hello.html"))
-}
 
 #[get("/")]
 async fn index_page() -> HttpResponse {
@@ -26,6 +20,13 @@ async fn weather_page() -> HttpResponse {
     HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(include_str!("../assets/weather.html"))
+}
+
+#[get("/finance")]
+async fn fincance_page() -> impl Responder {
+    HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(include_str!("../assets/finance.html"))
 }
 
 async fn get_path(req: HttpRequest) -> HttpResponse {
@@ -51,9 +52,9 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .configure(config)
-            .service(resource("/hello").name("hello").route(get().to(hello)))
             .service(index_page)
             .service(weather_page)
+            .service(fincance_page)
             .service(Files::new("/assets", "./assets").prefer_utf8(true))
     })
     .bind(("127.0.0.1", 8080))?

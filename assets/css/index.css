@@ -1,0 +1,15 @@
+:root {
+    color: rgb(62, 12, 105);
+    text-align: center;
+    font-size: larger;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: burlywood;
+}
+
+#webapp-list {
+    width: 10vw;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10vh;
+    margin-bottom: 10vh;
+}
