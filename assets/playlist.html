@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Playlist</title>
+    <style>
+      body {
+        background-color: black;
+        color: white;
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>🎵Playlist🎵</h1>
+    <iframe
+      id="playlist"
+      width="1080"
+      height="720"
+      src="https://www.youtube.com/embed/?list=PLV1eVFuHfneGX6rq6cB0MunCWAQwg4g6G"
+      title="YouTube video player"
+      frameborder="1"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+    >
+    </iframe>
+    <script>
+      let playlist = document.getElementById("playlist");
+      addEventListener("resize", (event) => {
+        if (window.innerWidth < 1080) {
+          playlist.width = "560";
+        }
+        if (window.innerWidth >= 1080) {
+          playlist.width = "1080";
+        }
+      });
+    </script>
+  </body>
+</html>
